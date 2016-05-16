@@ -1,0 +1,45 @@
+#!/usr/bin/perl -w
+
+# On Debian/Ubuntu, install the Perl Net::Stomp library with:
+#
+#    apt-get install libnet-stomp-perl
+#
+#
+# Sends a message into a queue using the STOMP protocol
+# To use this:
+# - install Apache ActiveMQ or HornetQ or a container such as JBoss Wildfly
+#   with an embedded message broker
+# - enable the STOMP port in the message broker
+# - create the queue in the message broker configuration
+# - add the queue name in the "destination" parameter below
+
+use utf8;
+use v5.12;
+use strict;
+
+use charnames();
+use Net::Stomp;
+
+my $argc = $#ARGV + 1;
+if ( $argc < 3 ) {
+  print STDERR "please specify source, dest and message\n";
+  exit 1;
+}
+
+my $stomp = Net::Stomp->new( { hostname => 'localhost', port => '61613' } );
+
+$stomp->connect( { login => 'guest', passcode => 'guest' } ) or die "failed to connect to STOMP";
+
+my $origin = $ARGV[0];
+my $dest = $ARGV[1];
+my $body = $ARGV[2];
+
+$stomp->send_transactional(
+  { destination => '/queue/sip-message.outbox',
+    'MessageOrigin' => $origin,
+    'MessageDestination' => $dest,
+    persistent => 'true',
+    body => $body } ) or die "failed to send!";
+
+$stomp->disconnect;
+
