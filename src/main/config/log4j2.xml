@@ -7,8 +7,8 @@
 <!--        <Syslog name="bsd" host="localhost" port="514" protocol="UDP"/> -->
     </Appenders>
     <Loggers>
-        <Root level="info">
-            <AppenderRef ref="bsd"/>
+        <Root level="debug">
+            <AppenderRef ref="Console"/>
         </Root>
     </Loggers>
 </Configuration>
